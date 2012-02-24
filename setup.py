@@ -21,7 +21,7 @@ setup(
     include_package_data = True,
     install_requires = [
         'tornado',
-        'lxml==2.3.2'
+        'lxml==2.3.3'
     ],
     tests_require = tests_require,
     extras_require = {'test': tests_require}
