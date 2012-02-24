@@ -19,10 +19,22 @@
 """
 A collection of sample response mappers.
 """
+import re
 
+from lxml.html import document_fromstring as parse_html
+from lxml.etree import tostring
 
 def map_to_docs(solr_response):
     """
     Response mapper that only returns the list of result documents.
     """
     return solr_response['response']['docs']
+
+def map_error_response(solr_response):
+    document = parse_html(solr_response.body)
+    title = tostring(document.xpath('//title').pop(), method='text')
+    reason = re.sub(r'(.*?\])', '', title).strip()
+
+    raw_body = tostring(document.xpath('//body').pop(), method='text').strip()
+    original_message = re.sub(r'(\s+)|(Powered.*$)', ' ', raw_body).strip()
+    return {'reason':reason, 'original_message': original_message}
