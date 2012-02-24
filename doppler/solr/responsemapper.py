@@ -31,10 +31,15 @@ def map_to_docs(solr_response):
     return solr_response['response']['docs']
 
 def map_error_response(solr_response):
-    document = parse_html(solr_response.body)
-    title = tostring(document.xpath('//title').pop(), method='text')
-    reason = re.sub(r'(.*?\])', '', title).strip()
+    if solr_response.code >= 400:
 
-    raw_body = tostring(document.xpath('//body').pop(), method='text').strip()
-    original_message = re.sub(r'(\s+)|(Powered.*$)', ' ', raw_body).strip()
-    return {'reason':reason, 'original_message': original_message}
+        document = parse_html(solr_response.body)
+        title = tostring(document.xpath('//title').pop(), method='text')
+        reason = re.sub(r'(.*?\])', '', title).strip()
+        body_element = document.xpath('//body').pop(), method='text'
+        raw_body = tostring(body_element).strip()
+        original_message = re.sub(r'(\s+)|(Powered.*$)', ' ', raw_body).strip()
+        return {'reason':reason, 'original_message': original_message}
+
+    else:
+        return solr_response
